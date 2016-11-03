@@ -1,8 +1,7 @@
-//mod constants;
-use constants;
 extern crate libc;
 extern crate ncurses;
 
+mod constants;
 
 struct SunyAT {
     //terminal: [[u8; constants::TERMINAL_HEIGHT]; TERMINAL_WIDTH+1];

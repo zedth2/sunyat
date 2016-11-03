@@ -1,4 +1,4 @@
-mod constants;
+//mod constants;
 /*
  * On read:  0 if no key, key code otherwise
  * On write: character output w/ cursor adjust
