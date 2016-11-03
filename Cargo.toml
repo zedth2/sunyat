@@ -1,0 +1,8 @@
+[package]
+name = "sunyat"
+version = "0.1.0"
+authors = ["zac"]
+
+[dependencies]
+libc = "0.2"
+ncurses = "5.83"
