@@ -20,7 +20,7 @@ pub const SIZE_APP_RAM: usize = 0xFF;
  *  Brief:
  *      This will be the max size allowed for any load rom file.
  */
-const SIZE_APP_ROM: usize = SIZE_APP_RAM + SIZE_APP_MSG;   //APP_ROM_SIZE (APP_MSG_SIZE + APP_RAM_SIZE)
+pub const SIZE_APP_ROM: usize = SIZE_APP_RAM + SIZE_APP_MSG;   //APP_ROM_SIZE (APP_MSG_SIZE + APP_RAM_SIZE)
 
 
 //System Registers
@@ -483,31 +483,33 @@ const OPCODE_AUX_I: i32 = 31;
  *      This will get thrown if the system wasn't given any rom file, or
  *          such, to load in.
  */
-const EXT_ERR_NO_FILE_ARG: i32 = 1;
+pub const EXT_ERR_NO_FILE_ARG: usize = 1;
 
 /**
  *  Brief:
  *      This will get thrown if the ROM provided is to large.
  */
-const EXT_ERR_ROM_BIG: i32 = 2;
+pub const EXT_ERR_ROM_BIG: usize = 2;
 
 /**
  *  Brief: //Look at sunyat.c:213
  *      This will get thrown if after reading t
  */
-const EXT_ERR_BYTE_SIZE: i32 = 3;
+pub const EXT_ERR_BYTE_SIZE: usize = 3;
 
 /**
  *  Brief:
  *      The provided file could not be open.
  */
-const EXT_ERR_FILE_NOT_OPEN: i32 = 4;
+pub const EXT_ERR_FILE_NOT_OPEN: usize = 4;
+
+pub const EXT_ERR_FILE_READ: usize = 5;
 
 /**
  *  Brief:
  *      Will be thrown when theres an error in ncurses.
  */
-const EXT_ERR_NCURSES: i32 = 5; //This should be expand to cover all ncurses errors.
+pub const EXT_ERR_NCURSES: usize = 6; //This should be expand to cover all ncurses errors.
 
 /**
  *	Brief:
@@ -531,7 +533,10 @@ const SAVE_STATE_SWITCH: &'static str = "-s\0";
 const DEBUGGER_SWITCH: &'static str = "-d\0";
 
 
+pub const ERR_BYTE_SIZE: &'static str = "\tApplication is not the correct byte size.\n";
 
-pub fn shit(){
-    println!("shit fuck");
-}
+pub const TERMINAL_WIDTH: usize = 80;
+
+pub const TERMINAL_HEIGHT: usize = 24;
+
+pub const TAB_SIZE: usize = 4;
