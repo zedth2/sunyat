@@ -4,6 +4,8 @@ extern crate libc;
 use std::io::Read;
 use std::fs::File;
 
+use ncurses;
+
 pub mod constants;
 
 mod sat_scr;
@@ -28,15 +30,30 @@ pub fn start_sunyat(rom: &str, lState: bool, lDebug: bool) -> usize{
     //let clock_start = unsafe {libc::clock()}; //Use this to pause eventually
     let mut reVal = constants::EXIT_SUCCESS;
     let mut curSunyAT = SunyAT { ..Default::default() };
-
-    if(lState){
+	let mut win: sat_scr::SatWin;
+    if lState {
         reVal = load_rom(&mut curSunyAT, rom);
     } else {
         reVal = load_state(&mut curSunyAT, rom);
     }
-    if(constants::EXIT_SUCCESS != reVal){
+    if constants::EXIT_SUCCESS != reVal {
         return reVal;
     }
+
+
+
+	//if !lDebug {
+		win = sat_scr::SatWin::new();
+		if constants::EXT_ERR_NCURSES == win.setup_ncurses_terminal(){
+			return constants::EXT_ERR_NCURSES;
+		}
+	//} else {
+
+	//}
+
+
+
+	sunyat_execute(&mut curSunyAT, &mut win);
 
 
     return reVal;
@@ -58,7 +75,7 @@ fn load_rom(sunyat: &mut SunyAT, rom: &str) -> usize {
             return constants::EXT_ERR_FILE_READ;
         },
     };
-    if(constants::SIZE_APP_ROM != file_buffer.len()){ //Should this be > ?
+    if constants::SIZE_APP_ROM != file_buffer.len(){ //Should this be > ?
         println!("Error: {}", constants::ERR_BYTE_SIZE);
         return constants::EXT_ERR_ROM_BIG;
     } //Deleted the else that was in original C code.
@@ -69,6 +86,88 @@ fn load_rom(sunyat: &mut SunyAT, rom: &str) -> usize {
 fn load_state(sunyat: &mut SunyAT, rom: &str) -> usize
 {
 return 255;
+}
+
+fn sunyat_execute(sat: &mut SunyAT, scr: &mut sat_scr::SatWin){
+	let mut pause = false;
+	let mut terminal_too_small_prev_cycle = false;
+
+	loop {
+		let mut opcode: u8;
+		let mut sreg: u8;
+		let mut dreg: u8;
+		let mut mem: u8;
+		let mut imm: i8;
+		let mut cmp_result: u8;
+
+		let mut curHeight: i32 = scr.mainWin.get_max_y();
+		let mut curWidth: i32 = scr.mainWin.get_max_x();
+
+		if curWidth < constants::TERMINAL_WIDTH || curHeight < constants::TERMINAL_HEIGHT {
+			let mut x: i32;
+			let mut y: i32;
+
+			terminal_too_small_prev_cycle = true;
+
+			for y in 0..curHeight {
+			//for (y = 0; y < curHeight; ++y){
+				scr.mainWin.mv(y, 0);
+				for x in 0..curWidth {
+				//for(x = 0 ; x < curWidth ; ++x){
+					scr.mainWin.addch('@');
+				}
+			}
+			let cx: i32 = curWidth / 2;
+			let cy: i32 = curHeight / 2;
+			scr.mainWin.mvprintw(cy-1, cx-10, "                    ");
+			scr.mainWin.mvprintw(cy, cx-10,   "  Window too small  ");
+			scr.mainWin.mvprintw(cy+1, cx-10, " resize to >= 80x24 ");
+			scr.mainWin.mvprintw(cy+2, cx-10, "                    ");
+			scr.mainWin.refresh();
+			continue
+		}
+
+		if terminal_too_small_prev_cycle {
+			scr.terminal_restore();
+			terminal_too_small_prev_cycle = false;
+			scr.mainWin.refresh();
+		}
+
+		sat.clock_ticks += 1;
+
+		if sat.registers[constants::REG_PC] > ((constants::SIZE_APP_RAM - 2) as u8) {
+			println!("ERROR : {}", constants::ERR_INVALID_PC);
+			return;
+		}
+
+		sat.registers[constants::REG_PC] += 1;
+		sat.registers[constants::REG_IRH] = sat.ram[sat.registers[constants::REG_PC] as usize];
+		sat.registers[constants::REG_PC] += 1;
+		sat.registers[constants::REG_IRL] = sat.ram[sat.registers[constants::REG_PC] as usize];
+
+		opcode = get_opcode(sat.registers[constants::REG_IRH]);
+		//sreg =
+	}
+
+	fn get_opcode(highBits: u8) -> u8 {
+		highBits >> 3
+	}
+
+	fn get_dreg(highBits: u8) -> u8 {
+		highBits & 0x07
+	}
+
+	fn get_sreg(lowBits: u8) -> u8 {
+		lowBits & 0x07
+	}
+
+	fn get_mem(lowBits: u8) -> u8 {
+		lowBits
+	}
+
+	fn get_imm(lowBits: i8) -> i8 {
+		lowBits
+	}
 }
 
 pub fn shit(){

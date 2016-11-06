@@ -28,28 +28,28 @@ pub const SIZE_APP_ROM: usize = SIZE_APP_RAM + SIZE_APP_MSG;   //APP_ROM_SIZE (A
  *  Brief:
  *      This register will contain the current program counter.
  */
-const REG_PC: i32 = 0;
+pub const REG_PC: usize = 0;
 
 /**
  *  Brief:
  *      This is the register containing the 8 high bits of the currently
  *          loaded instruction.
  */
-const REG_IRH: i32 = 1;
+pub const REG_IRH: usize = 1;
 
 /**
  * Brief:
  *      This is the register containing the 8 low bits of the currently
  *          loaded instruction.
  */
-const REG_IRL: i32 = 2;
+pub const REG_IRL: usize = 2;
 
 /**
  *  Brief:
  *      This register will contain the current starting position of the
  *          register window.
  */
-const REG_WIN: i32 = 3;
+pub const REG_WIN: i32 = 3;
 
 /**
  *  Brief:
@@ -535,8 +535,10 @@ const DEBUGGER_SWITCH: &'static str = "-d\0";
 
 pub const ERR_BYTE_SIZE: &'static str = "\tApplication is not the correct byte size.\n";
 
-pub const TERMINAL_WIDTH: usize = 80;
+pub const ERR_INVALID_PC: &'static str = "\tProgram counter is invalid\n";
 
-pub const TERMINAL_HEIGHT: usize = 24;
+pub const TERMINAL_WIDTH: i32 = 80;
+
+pub const TERMINAL_HEIGHT: i32 = 24;
 
 pub const TAB_SIZE: usize = 4;
