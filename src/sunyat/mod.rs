@@ -88,6 +88,41 @@ fn load_state(sunyat: &mut SunyAT, rom: &str) -> usize
 return 255;
 }
 
+fn get_grwp(regWin: u8, reg: u8){
+	((((regWin - constants::NUM_SYS_REG as u8) +
+		(constants::NUM_GEN_REG as u8 +
+		((constants::NUM_GEN_REG as u8 * (reg / constants::NUM_GEN_REG as u8) + reg) % constants::NUM_GEN_REG as u8))) %
+		constants::NUM_GEN_REG as u8) + constants::NUM_SYS_REG as u8)
+}
+
+fn get_grimm(regWin: u8, imm: i8){
+	let mut highLow: i8 = 0;
+	if 0 > imm {
+		highLow = (imm - (constants::NUM_GEN_REG as i8 * (imm / constants::NUM_GEN_REG as i8)));
+	}
+	else if 0 < imm {
+		highLow = (constants::NUM_GEN_REG as i8 * (imm / constants::NUM_GEN_REG as i8) + imm) % constants::NUM_GEN_REG as i8;
+	}
+	return ((((regWin as i8 - constants::NUM_SYS_REG as i8) +
+		(constants::NUM_GEN_REG as i8 +
+		highLow)) %
+		constants::NUM_GEN_REG as i8) + constants::NUM_SYS_REG as i8);
+}
+
+
+//macro_rules! GET_GRWP {
+	//($regWin:expr, $imm:expr) => {
+		//(((($regWin - constants::NUM_SYS_REG) + (constants::NUM_GEN_REG + HIGH_OR_LOW!($imm))) % constants::NUM_GEN_REG) + constants::NUM_SYS_REG)
+	//};
+//}
+
+//macro_rules! HIGH_OR_LOW {
+	//($imm:expr) => {
+		//(((0 > $imm) as usize * ($imm - (constants::NUM_GEN_REG * ($imm / constants::NUM_GEN_REG)))) + ((0 < $imm) * (constants::NUM_GEN_REG * ($imm / constants::NUM_GEN_REG) + $imm) % constants::NUM_GEN_REG))
+	//};
+//}
+
+
 fn sunyat_execute(sat: &mut SunyAT, scr: &mut sat_scr::SatWin){
 	let mut pause = false;
 	let mut terminal_too_small_prev_cycle = false;
@@ -124,7 +159,7 @@ fn sunyat_execute(sat: &mut SunyAT, scr: &mut sat_scr::SatWin){
 			scr.mainWin.mvprintw(cy+1, cx-10, " resize to >= 80x24 ");
 			scr.mainWin.mvprintw(cy+2, cx-10, "                    ");
 			scr.mainWin.refresh();
-			continue
+			continue;
 		}
 
 		if terminal_too_small_prev_cycle {
@@ -146,31 +181,35 @@ fn sunyat_execute(sat: &mut SunyAT, scr: &mut sat_scr::SatWin){
 		sat.registers[constants::REG_IRL] = sat.ram[sat.registers[constants::REG_PC] as usize];
 
 		opcode = get_opcode(sat.registers[constants::REG_IRH]);
-		//sreg =
+
+		//sreg = GET_GRWP!(sat.registers[constants::REG_WIN], get_sreg(sat.registers[constants::REG_IRL]));
+
+		//dreg = GET_GRWP!(sat.registers[constants::REG_WIN], get_dreg(sat.registers[constants::REG_IRH]));
+
+		imm = get_imm(sat.registers[constants::REG_IRL] as i8);
+		mem = get_mem(sat.registers[constants::REG_IRL]);
+
 	}
 
-	fn get_opcode(highBits: u8) -> u8 {
-		highBits >> 3
-	}
 
-	fn get_dreg(highBits: u8) -> u8 {
-		highBits & 0x07
-	}
-
-	fn get_sreg(lowBits: u8) -> u8 {
-		lowBits & 0x07
-	}
-
-	fn get_mem(lowBits: u8) -> u8 {
-		lowBits
-	}
-
-	fn get_imm(lowBits: i8) -> i8 {
-		lowBits
-	}
 }
 
-pub fn shit(){
-    start_sunyat("", false, false);
-    println!("SHIT DICKS");
+fn get_opcode(highBits: u8) -> u8 {
+	highBits >> 3
+}
+
+fn get_dreg(highBits: u8) -> u8 {
+	highBits & 0x07
+}
+
+fn get_sreg(lowBits: u8) -> u8 {
+	lowBits & 0x07
+}
+
+fn get_mem(lowBits: u8) -> u8 {
+	lowBits
+}
+
+fn get_imm(lowBits: i8) -> i8 {
+	lowBits
 }

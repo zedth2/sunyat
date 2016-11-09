@@ -49,7 +49,7 @@ pub const REG_IRL: usize = 2;
  *      This register will contain the current starting position of the
  *          register window.
  */
-pub const REG_WIN: i32 = 3;
+pub const REG_WIN: usize = 3;
 
 /**
  *  Brief:
@@ -63,7 +63,7 @@ const REG_SP: i32 = 4;
  *          It will be used to figure out where the general purpose registers
  *          start.
  */
-const NUM_SYS_REG: usize = 5; //Number of system registers (0-4) used for referencing GPRs starting at 0.
+pub const NUM_SYS_REG: usize = 5; //Number of system registers (0-4) used for referencing GPRs starting at 0.
 
 
 //General Purpose Registars
@@ -72,7 +72,7 @@ const NUM_SYS_REG: usize = 5; //Number of system registers (0-4) used for refere
  *  Brief:
  *      This is the number of general purpose registers.
  */
-const NUM_GEN_REG: usize = 32;
+pub const NUM_GEN_REG: usize = 32;
 
 /**
  *  Brief:
