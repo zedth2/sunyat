@@ -88,14 +88,14 @@ fn load_state(sunyat: &mut SunyAT, rom: &str) -> usize
 return 255;
 }
 
-fn get_grwp(regWin: u8, reg: u8){
+fn get_grwp(regWin: u8, reg: u8) -> u8{
 	((((regWin - constants::NUM_SYS_REG as u8) +
 		(constants::NUM_GEN_REG as u8 +
 		((constants::NUM_GEN_REG as u8 * (reg / constants::NUM_GEN_REG as u8) + reg) % constants::NUM_GEN_REG as u8))) %
 		constants::NUM_GEN_REG as u8) + constants::NUM_SYS_REG as u8)
 }
 
-fn get_grimm(regWin: u8, imm: i8){
+fn get_grimm(regWin: u8, imm: i8) -> i8{
 	let mut highLow: i8 = 0;
 	if 0 > imm {
 		highLow = (imm - (constants::NUM_GEN_REG as i8 * (imm / constants::NUM_GEN_REG as i8)));
@@ -103,10 +103,7 @@ fn get_grimm(regWin: u8, imm: i8){
 	else if 0 < imm {
 		highLow = (constants::NUM_GEN_REG as i8 * (imm / constants::NUM_GEN_REG as i8) + imm) % constants::NUM_GEN_REG as i8;
 	}
-	return ((((regWin as i8 - constants::NUM_SYS_REG as i8) +
-		(constants::NUM_GEN_REG as i8 +
-		highLow)) %
-		constants::NUM_GEN_REG as i8) + constants::NUM_SYS_REG as i8);
+	((((regWin as i8 - constants::NUM_SYS_REG as i8) + (constants::NUM_GEN_REG as i8 + highLow)) % constants::NUM_GEN_REG as i8) + constants::NUM_SYS_REG as i8)
 }
 
 
