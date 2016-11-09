@@ -186,6 +186,143 @@ fn sunyat_execute(sat: &mut SunyAT, scr: &mut sat_scr::SatWin){
 		imm = get_imm(sat.registers[constants::REG_IRL] as i8);
 		mem = get_mem(sat.registers[constants::REG_IRL]);
 
+		if lDebug {
+
+		}
+
+		match opcode {
+			constants::OPCODE_MOV_RR => {
+
+			},
+			constants::OPCODE_MOV_RI => {
+
+			},
+
+			constants::OPCODE_ADD_RR => {
+
+			},
+
+			constants::OPCODE_ADD_RI => {
+
+			},
+
+			constants::OPCODE_SUB_RR => {
+
+			},
+
+			constants::OPCODE_MUL_RR => {
+
+			},
+
+			constants::OPCODE_MUL_RI => {
+
+			},
+
+			constants::OPCODE_DIV_RR => {
+
+			},
+
+			constants::OPCODE_DIV_RI => {
+
+			},
+
+			constants::OPCODE_CMP_RR => {
+
+			},
+
+			constants::OPCODE_CMP_RI => {
+
+			},
+
+			constants::OPCODE_JMP_M => {
+
+			},
+
+			constants::OPCODE_JEQ_M => {
+
+			},
+
+			constants::OPCODE_JGR_M => {
+
+			},
+
+			constants::OPCODE_JLS_M => {
+
+			},
+
+			constants::OPCODE_CALL_M => {
+
+			},
+
+			constants::OPCODE_RET => {
+
+			},
+
+			constants::OPCODE_AND_RR => {
+
+			},
+
+			constants::OPCODE_AND_RI => {
+
+			},
+
+			constants::OPCODE_OR_RR => {
+
+			},
+
+			constants::OPCODE_OR_RI => {
+
+			},
+
+			constants::OPCODE_XOR_RR => {
+
+			},
+
+			constants::OPCODE_XOR_RI => {
+
+			},
+
+			constants::OPCODE_LOAD_RM => {
+
+			},
+
+			constants::OPCODE_LOADP_RR => {
+
+			},
+
+			constants::OPCODE_STOR_MR => {
+
+			},
+
+			constants::OPCODE_STORP_RR => {
+
+			},
+			/*
+			constants::OPCODE_PUSH_R => {
+
+			},
+
+			constants::OPCODE_POP_R => {
+
+			},
+			*/
+
+			constants::OPCODE_STACKER_R => {
+
+			},
+
+			constants::OPCODE_SWR_I => {
+
+			},
+
+			constants::OPCODE_AWR_I => {
+
+			},
+
+			constants::OPCODE_AUX_I => {
+
+			},
+		}
 	}
 
 
