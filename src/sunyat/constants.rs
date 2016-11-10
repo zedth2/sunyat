@@ -7,7 +7,7 @@ const IO_TERMINAL: i32 = 0xFF;
 
 pub const EXIT_SUCCESS: usize = 0;
 
-const SIZE_APP_MSG: usize = 70; //Probably pointless
+pub const SIZE_APP_MSG: usize = 70; //Probably pointless
 
 //Apparently in Rust array sizes have to be of type usize
 /**
@@ -118,7 +118,7 @@ const MAX_WIN_INDEX: usize = SIZE_REG - SIZE_WIN;
  *
  *	Affected Flags: None
  */
-pub const OPCODE_MOV_RR: i32 = 0;
+pub const OPCODE_MOV_RR: u8 = 0;
 //-----------------------------------------------------------------------
 
 /*OPCODE 1: MOV (Immediate To Register)----------------------------------
@@ -127,7 +127,7 @@ pub const OPCODE_MOV_RR: i32 = 0;
  *
  *	Affected Flags: None
  */
-pub const OPCODE_MOV_RI: i32 = 1;
+pub const OPCODE_MOV_RI: u8 = 1;
 //-----------------------------------------------------------------------
 
 /*OPCODE 2: ADD (Register to Register)-----------------------------------
@@ -136,7 +136,7 @@ pub const OPCODE_MOV_RI: i32 = 1;
  *
  *	Affected Flags: Zero and Sign
  */
-pub const OPCODE_ADD_RR: i32 = 2;
+pub const OPCODE_ADD_RR: u8 = 2;
 //-----------------------------------------------------------------------
 
 /*OPCODE 3: MOV (Immediate To Register)----------------------------------
@@ -145,7 +145,7 @@ pub const OPCODE_ADD_RR: i32 = 2;
  *
  *	Affected Flags: Zero and Sign
  */
-pub const OPCODE_ADD_RI: i32 = 3;
+pub const OPCODE_ADD_RI: u8 = 3;
 //-----------------------------------------------------------------------
 
 /*OPCODE 4: SUB (Register to Register)-----------------------------------
@@ -154,7 +154,7 @@ pub const OPCODE_ADD_RI: i32 = 3;
  *
  *	Affected Flags: Zero and Sign
  */
-pub const OPCODE_SUB_RR: i32 = 4;
+pub const OPCODE_SUB_RR: u8 = 4;
 //-----------------------------------------------------------------------
 
 /*OPCODE 5: MUL (Register to Register)-----------------------------------
@@ -163,7 +163,7 @@ pub const OPCODE_SUB_RR: i32 = 4;
  *
  *	Affected Flags: Zero and Sign
  */
-pub const OPCODE_MUL_RR: i32 = 5;
+pub const OPCODE_MUL_RR: u8 = 5;
 //-----------------------------------------------------------------------
 
 /*OPCODE 6: MUL (Immediate to Register)----------------------------------
@@ -172,7 +172,7 @@ pub const OPCODE_MUL_RR: i32 = 5;
  *
  *	Affected Flags: Zero and Sign
  */
-pub const OPCODE_MUL_RI: i32 = 6;
+pub const OPCODE_MUL_RI: u8 = 6;
 //-----------------------------------------------------------------------
 
 /*OPCODE 7: DIV (Register to Register)-----------------------------------
@@ -181,7 +181,7 @@ pub const OPCODE_MUL_RI: i32 = 6;
  *
  *	Affected Flags: Zero and Sign
  */
-pub const OPCODE_DIV_RR: i32 = 7;
+pub const OPCODE_DIV_RR: u8 = 7;
 //-----------------------------------------------------------------------
 
 /*OPCODE 8: DIV (Immediate to Register)----------------------------------
@@ -190,7 +190,7 @@ pub const OPCODE_DIV_RR: i32 = 7;
  *
  *	Affected Flags: Zero and Sign
  */
-pub const OPCODE_DIV_RI: i32 = 8;
+pub const OPCODE_DIV_RI: u8 = 8;
 //-----------------------------------------------------------------------
 
 /*OPCODE 9: CMP (Register to Register)-----------------------------------
@@ -201,7 +201,7 @@ pub const OPCODE_DIV_RI: i32 = 8;
  *
  *	Affected Flags: Zero and Sign
  */
-pub const OPCODE_CMP_RR: i32 = 9;
+pub const OPCODE_CMP_RR: u8 = 9;
 //-----------------------------------------------------------------------
 
 /*OPCODE 10: CMP (Immediate to Register)---------------------------------
@@ -212,7 +212,7 @@ pub const OPCODE_CMP_RR: i32 = 9;
  *
  *	Affected Flags: Zero and Sign
  */
-pub const OPCODE_CMP_RI: i32 = 10;
+pub const OPCODE_CMP_RI: u8 = 10;
 //-----------------------------------------------------------------------
 
 /*OPCODE 11: JMP --------------------------------------------------------
@@ -224,7 +224,7 @@ pub const OPCODE_CMP_RI: i32 = 10;
  *
  *	Affected Flags: None
  */
-pub const OPCODE_JMP_M: i32 = 11;
+pub const OPCODE_JMP_M: u8 = 11;
 //-----------------------------------------------------------------------
 
 /*OPCODE 12: JEQ --------------------------------------------------------
@@ -237,7 +237,7 @@ pub const OPCODE_JMP_M: i32 = 11;
  *
  *	Affected Flags: None
  */
-pub const OPCODE_JEQ_M: i32 = 12;
+pub const OPCODE_JEQ_M: u8 = 12;
 //-----------------------------------------------------------------------
 
 /*OPCODE 13: JNE --------------------------------------------------------
@@ -250,7 +250,7 @@ pub const OPCODE_JEQ_M: i32 = 12;
  *
  *	Affected Flags: None
  */
-pub const OPCODE_JNE_M: i32 = 13;
+pub const OPCODE_JNE_M: u8 = 13;
 //-----------------------------------------------------------------------
 
 /*OPCODE 14: JGR --------------------------------------------------------
@@ -264,7 +264,7 @@ pub const OPCODE_JNE_M: i32 = 13;
  *
  *	Affected Flags: None
  */
-pub const OPCODE_JGR_M: i32 = 14;
+pub const OPCODE_JGR_M: u8 = 14;
 //-----------------------------------------------------------------------
 
 /*OPCODE 15: JGR --------------------------------------------------------
@@ -278,7 +278,7 @@ pub const OPCODE_JGR_M: i32 = 14;
  *
  *	Affected Flags: None
  */
-pub const OPCODE_JLS_M: i32 = 15;
+pub const OPCODE_JLS_M: u8 = 15;
 //-----------------------------------------------------------------------
 
 /*OPCODE 16: CALL -------------------------------------------------------
@@ -290,7 +290,7 @@ pub const OPCODE_JLS_M: i32 = 15;
  *
  *	Affected Flags: None
  */
-pub const OPCODE_CALL_M: i32 = 16;
+pub const OPCODE_CALL_M: u8 = 16;
 //-----------------------------------------------------------------------
 
 /*OPCODE 17: RET --------------------------------------------------------
@@ -303,7 +303,7 @@ pub const OPCODE_CALL_M: i32 = 16;
  *
  *	Affected Flags: None
  */
-pub const OPCODE_RET: i32 = 17;
+pub const OPCODE_RET: u8 = 17;
 //-----------------------------------------------------------------------
 
 /*OPCODE 18: AND (Register to Register) ---------------------------------
@@ -313,7 +313,7 @@ pub const OPCODE_RET: i32 = 17;
  *
  *	Affected Flags: Zero and Sign
  */
-pub const OPCODE_AND_RR: i32 = 18;
+pub const OPCODE_AND_RR: u8 = 18;
 //-----------------------------------------------------------------------
 
 /*OPCODE 19: AND (Immediate to Register) --------------------------------
@@ -323,7 +323,7 @@ pub const OPCODE_AND_RR: i32 = 18;
  *
  *	Affected Flags: Zero and Sign
  */
-pub const OPCODE_AND_RI: i32 = 19;
+pub const OPCODE_AND_RI: u8 = 19;
 //-----------------------------------------------------------------------
 
 /*OPCODE 20: OR (Register to Register) ----------------------------------
@@ -333,7 +333,7 @@ pub const OPCODE_AND_RI: i32 = 19;
  *
  *	Affected Flags: Zero and Sign
  */
-pub const OPCODE_OR_RR: i32 = 20;
+pub const OPCODE_OR_RR: u8 = 20;
 //-----------------------------------------------------------------------
 
 /*OPCODE 21: OR (Immediate to Register) ---------------------------------
@@ -343,7 +343,7 @@ pub const OPCODE_OR_RR: i32 = 20;
  *
  *	Affected Flags: Zero and Sign
  */
-pub const OPCODE_OR_RI: i32 = 21;
+pub const OPCODE_OR_RI: u8 = 21;
 //-----------------------------------------------------------------------
 
 /*OPCODE 22: XOR (Register to Register) ---------------------------------
@@ -353,7 +353,7 @@ pub const OPCODE_OR_RI: i32 = 21;
  *
  *	Affected Flags: Zero and Sign
  */
-pub const OPCODE_XOR_RR: i32 = 22;
+pub const OPCODE_XOR_RR: u8 = 22;
 //-----------------------------------------------------------------------
 
 /*OPCODE 23: XOR (Immediate to Register) --------------------------------
@@ -363,7 +363,7 @@ pub const OPCODE_XOR_RR: i32 = 22;
  *
  *	Affected Flags: Zero and Sign
  */
-pub const OPCODE_XOR_RI: i32 = 23;
+pub const OPCODE_XOR_RI: u8 = 23;
 //-----------------------------------------------------------------------
 
 /*OPCODE 24: LOAD -------------------------------------------------------
@@ -373,7 +373,7 @@ pub const OPCODE_XOR_RI: i32 = 23;
  *
  *	Affected Flags: None
  */
-pub const OPCODE_LOAD_RM: i32 = 24;
+pub const OPCODE_LOAD_RM: u8 = 24;
 //-----------------------------------------------------------------------
 
 /*OPCODE 25: LOADP ------------------------------------------------------
@@ -383,7 +383,7 @@ pub const OPCODE_LOAD_RM: i32 = 24;
  *
  *	Affected Flags: None
  */
-pub const OPCODE_LOADP_RR: i32 = 25;
+pub const OPCODE_LOADP_RR: u8 = 25;
 //-----------------------------------------------------------------------
 
 /*OPCODE 26: STOR -------------------------------------------------------
@@ -393,7 +393,7 @@ pub const OPCODE_LOADP_RR: i32 = 25;
  *
  *	Affected Flags: None
  */
-pub const OPCODE_STOR_MR: i32 = 26;
+pub const OPCODE_STOR_MR: u8 = 26;
 //-----------------------------------------------------------------------
 
 /*OPCODE 27: STORP ------------------------------------------------------
@@ -403,7 +403,7 @@ pub const OPCODE_STOR_MR: i32 = 26;
  *
  *	Affected Flags: None
  */
-pub const OPCODE_STORP_RR: i32 = 27;
+pub const OPCODE_STORP_RR: u8 = 27;
 //-----------------------------------------------------------------------
 
 /*OPCODE 28: PUSH -------------------------------------------------------
@@ -414,7 +414,7 @@ pub const OPCODE_STORP_RR: i32 = 27;
  *
  *	Affected Flags: None
  */
-//pub const OPCODE_PUSH_R: i32 = 28;
+//pub const OPCODE_PUSH_R: u8 = 28;
 //-----------------------------------------------------------------------
 
 /*OPCODE 29: POP --------------------------------------------------------
@@ -425,7 +425,7 @@ pub const OPCODE_STORP_RR: i32 = 27;
  *
  *	Affected Flags: None
  */
-//pub const OPCODE_POP_R: i32 = 29;
+//pub const OPCODE_POP_R: u8 = 29;
 //-----------------------------------------------------------------------
 
 
@@ -436,7 +436,7 @@ pub const OPCODE_STORP_RR: i32 = 27;
  *
  *	Affected Flags: ???
  */
-pub const OPCODE_STACKER_R: i32 = 28;
+pub const OPCODE_STACKER_R: u8 = 28;
 
 
 
@@ -446,7 +446,7 @@ pub const OPCODE_STACKER_R: i32 = 28;
  *
  *	Affected Flags: None
  */
-pub const OPCODE_SWR_I: i32 = 29;
+pub const OPCODE_SWR_I: u8 = 29;
 //-----------------------------------------------------------------------
 
 /*OPCODE 30: AWR --------------------------------------------------------
@@ -455,7 +455,7 @@ pub const OPCODE_SWR_I: i32 = 29;
  *
  *	Affected Flags: None
  */
-pub const OPCODE_AWR_I: i32 = 30;
+pub const OPCODE_AWR_I: u8 = 30;
 //-----------------------------------------------------------------------
 
 /*OPCODE 31: AUX --------------------------------------------------------
@@ -472,7 +472,7 @@ pub const OPCODE_AWR_I: i32 = 30;
  *
  *	Affected Flags: None
  */
-pub const OPCODE_AUX_I: i32 = 31;
+pub const OPCODE_AUX_I: u8 = 31;
 //-----------------------------------------------------------------------
 
 
