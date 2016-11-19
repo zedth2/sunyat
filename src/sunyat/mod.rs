@@ -583,12 +583,12 @@ fn sunyat_execute(sat: &mut SunyAT, scr: &mut sat_scr::SatWin, lDebug: bool){
 			},
 
 			OPCODE_SWR_I => {
-                sat.registers[REG_WIN] = imm;
+                sat.registers[REG_WIN] = imm as u8;
 				println!("OPCODE_SWR_I");
 			},
 
 			OPCODE_AWR_I => {
-                sat.registers[REG_WIN] = get_grimm(sat.registers[REG_WIN], imm);
+                sat.registers[REG_WIN] = get_grimm(sat.registers[REG_WIN], imm) as u8;
                 let re = set_flags(sat.registers[REG_WIN] as i8);
                 sat.zero_flag = re.0;
                 sat.sign_flag = re.1;
