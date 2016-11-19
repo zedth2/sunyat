@@ -1,1 +1,4 @@
 target
+*.rom
+Cargo.lock
+*.geany

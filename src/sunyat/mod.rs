@@ -6,6 +6,7 @@ use std::fs::File;
 use std::string::String;
 
 use ncurses;
+use pancurses;
 
 pub mod constants;
 
@@ -16,14 +17,16 @@ struct SunyAT {
     linefeed_buffered: bool,
     debug: bool,
     clock_ticks: usize,
-
+    zero_flag: bool,
+    sign_flag: bool,
+    interrupt_flag: bool,
     ram: [u8; constants::SIZE_APP_RAM],
     registers: [u8; constants::SIZE_REG],
 }
 
 impl Default for SunyAT {
     fn default() -> SunyAT {
-        let mut newSat = SunyAT { linefeed_buffered: false, debug: false, clock_ticks: 0, ram: [0; constants::SIZE_APP_RAM], registers: [0; constants::SIZE_REG]};
+        let mut newSat = SunyAT { linefeed_buffered: false, debug: false, clock_ticks: 0, zero_flag: false, sign_flag: false, interrupt_flag: false, ram: [0; constants::SIZE_APP_RAM], registers: [0; constants::SIZE_REG]};
         newSat.registers[0] = 0;
         newSat.registers[1] = 0;
         newSat.registers[2] = 0;
@@ -120,8 +123,8 @@ fn sunyat_execute(sat: &mut SunyAT, scr: &mut sat_scr::SatWin, lDebug: bool){
 
 	loop {
 		let mut opcode: u8;
-		let mut sreg: u8;
-		let mut dreg: u8;
+		let mut sreg: usize;
+		let mut dreg: usize;
 		let mut mem: u8;
 		let mut imm: i8;
 		let mut cmp_result: u8;
@@ -174,9 +177,9 @@ fn sunyat_execute(sat: &mut SunyAT, scr: &mut sat_scr::SatWin, lDebug: bool){
 
 		opcode = get_opcode(sat.registers[constants::REG_IRH]);
 
-		sreg = get_grwp(sat.registers[constants::REG_WIN], get_sreg(sat.registers[constants::REG_IRL]));
+		sreg = get_grwp(sat.registers[constants::REG_WIN], get_sreg(sat.registers[constants::REG_IRL])) as usize;
 
-		dreg = get_grwp(sat.registers[constants::REG_WIN], get_dreg(sat.registers[constants::REG_IRH]));
+		dreg = get_grwp(sat.registers[constants::REG_WIN], get_dreg(sat.registers[constants::REG_IRH])) as usize;
 
 		imm = get_imm(sat.registers[constants::REG_IRL] as i8);
 		mem = get_mem(sat.registers[constants::REG_IRL]);
@@ -187,109 +190,285 @@ fn sunyat_execute(sat: &mut SunyAT, scr: &mut sat_scr::SatWin, lDebug: bool){
 		println!("OPCODE : {}", opcode);
 		match opcode {
 			constants::OPCODE_MOV_RR => {
+				sat.registers[dreg] = sat.registers[sreg];
 				println!("OPCODE_MOV_RR");
 			},
 			constants::OPCODE_MOV_RI => {
+				sat.registers[dreg] = imm as u8;
 				println!("OPCODE_MOV_RI");
 			},
 
 			constants::OPCODE_ADD_RR => {
+				sat.registers[dreg] = sat.registers[dreg] + sat.registers[sreg];
+				let re = set_flags(sat.registers[dreg] as i8);
+				sat.zero_flag = re.0;
+				sat.sign_flag = re.1;
 				println!("OPCODE_ADD_RR");
 			},
 
 			constants::OPCODE_ADD_RI => {
+				sat.registers[dreg] = (sat.registers[dreg] as i8 + imm) as u8;
+				let re = set_flags(sat.registers[dreg] as i8);
+				sat.zero_flag = re.0;
+				sat.sign_flag = re.1;
 				println!("OPCODE_ADD_RI");
 			},
 
 			constants::OPCODE_SUB_RR => {
+                sat.registers[dreg] = sat.registers[dreg] - sat.registers[sreg];
+                let re = set_flags(sat.registers[dreg] as i8);
+                sat.zero_flag = re.0;
+                sat.sign_flag = re.1;
 				println!("OPCODE_SUB_RR");
 			},
 
 			constants::OPCODE_MUL_RR => {
+                sat.registers[dreg] = sat.registers[dreg] * sat.registers[sreg];
+                let re = set_flags(sat.registers[dreg] as i8);
+                sat.zero_flag = re.0;
+                sat.sign_flag = re.1;
 				println!("OPCODE_MUL_RR");
 			},
 
 			constants::OPCODE_MUL_RI => {
+                sat.registers[dreg] = (sat.registers[dreg] as i8 * imm) as u8;
+				let re = set_flags(sat.registers[dreg] as i8);
+				sat.zero_flag = re.0;
+				sat.sign_flag = re.1;
 				println!("OPCODE_MUL_RI");
 			},
 
 			constants::OPCODE_DIV_RR => {
+                if 0 == sat.registers[sreg] {
+                    println!("{}", constants::ERR_DIV_ZERO);
+                    return;
+                }
+                sat.registers[dreg] = (sat.registers[dreg] as i8 / imm) as u8;
+                let re = set_flags(sat.registers[dreg] as i8);
+                sat.zero_flag = re.0;
+                sat.sign_flag = re.1;
 				println!("OPCODE_MUL_RI");
 			},
 
 			constants::OPCODE_DIV_RI => {
+                if 0 == sat.registers[sreg] {
+                    println!("{}", constants::ERR_DIV_ZERO);
+                    return;
+                }
+                sat.registers[dreg] = (sat.registers[dreg] as i8 / imm) as u8;
+                let re = set_flags(sat.registers[dreg] as i8);
+                sat.zero_flag = re.0;
+                sat.sign_flag = re.1;
 				println!("OPCODE_DIV_RI");
 			},
 
 			constants::OPCODE_CMP_RR => {
+                let re = set_flags((sat.registers[dreg] - sat.registers[sreg]) as i8);
+                sat.zero_flag = re.0;
+                sat.sign_flag = re.1;
 				println!("OPCODE_CMP_RR");
 			},
 
 			constants::OPCODE_CMP_RI => {
+                let re = set_flags(sat.registers[dreg] as i8 - imm);
+                sat.zero_flag = re.0;
+                sat.sign_flag = re.1;
 				println!("OPCODE_CMP_RI");
 			},
 
 			constants::OPCODE_JMP_M => {
+                if mem as usize >= constants::SIZE_APP_RAM {
+                    println!("{}", constants::ERR_JMP_RANGE);
+                    return;
+                }
+                sat.registers[constants::REG_PC] = mem;
 				println!("OPCODE_JMP_M");
 			},
 
 			constants::OPCODE_JEQ_M => {
+                if sat.zero_flag {
+                    sat.registers[constants::REG_PC] = mem;
+                }
 				println!("OPCODE_JEQ_M");
 			},
 
 			constants::OPCODE_JNE_M => {
+                if !sat.zero_flag {
+                    sat.registers[constants::REG_PC] = mem;
+                }
 				println!("OPCODE_JNE_M");
 			},
 
 			constants::OPCODE_JGR_M => {
+                if !sat.sign_flag && !sat.zero_flag {
+                    sat.registers[constants::REG_PC] = mem;
+                }
 				println!("OPCODE_JGR_M");
 			},
 
 			constants::OPCODE_JLS_M => {
+                if !sat.sign_flag {
+                    sat.registers[constants::REG_PC] = mem;
+                } else {
+                    if 0 >= sat.registers[constants::REG_SP] {
+                        println!("{}", constants::ERR_CALL_OVERFLOW);
+                        return;
+                    }
+                    if mem as usize >= constants::SIZE_APP_RAM {
+                        println!("{}", constants::ERR_CALL_RANGE);
+                        return;
+                    }
+                    sat.registers[constants::REG_SP] -= 1;
+                    sat.ram[sat.registers[constants::REG_SP] as usize] = sat.registers[constants::REG_PC];
+                    sat.registers[constants::REG_PC] = mem;
+                }
 				println!("OPCODE_JLS_M");
 			},
 
 			constants::OPCODE_CALL_M => {
+                if 0 >= sat.registers[constants::REG_SP] {
+                    println!("{}", constants::ERR_CALL_OVERFLOW);
+                    return;
+                }
+                if mem as usize >= constants::SIZE_APP_RAM {
+                    println!("{}", constants::ERR_CALL_RANGE);
+                    return ;
+                }
+                sat.registers[constants::REG_SP] -= 1;
+                sat.ram[sat.registers[constants::REG_SP] as usize] = sat.registers[constants::REG_PC];
+                sat.registers[constants::REG_PC] = mem;
 				println!("OPCODE_CALL_M");
 			},
 
 			constants::OPCODE_RET => {
+                if constants::SIZE_APP_RAM <= sat.registers[constants::REG_SP] as usize {
+                    return ;
+                }
+                sat.registers[constants::REG_PC] = sat.ram[sat.registers[constants::REG_SP] as usize];
+                sat.registers[constants::REG_SP] += 1;
 				println!("OPCODE_RET");
 			},
 
 			constants::OPCODE_AND_RR => {
+                sat.registers[dreg] = sat.registers[dreg] & sat.registers[sreg];
+                let re = set_flags(sat.registers[dreg] as i8);
+                sat.zero_flag = re.0;
+                sat.sign_flag = re.1;
 				println!("OPCODE_AND_RR");
 			},
 
 			constants::OPCODE_AND_RI => {
+                sat.registers[dreg] = sat.registers[dreg] & imm as u8;
+                let re = set_flags(sat.registers[dreg] as i8);
+                sat.zero_flag = re.0;
+                sat.sign_flag = re.1;
 				println!("OPCODE_AND_RI");
 			},
 
 			constants::OPCODE_OR_RR => {
+                sat.registers[dreg] = sat.registers[dreg] | sat.registers[sreg];
+                let re = set_flags(sat.registers[dreg] as i8);
+                sat.zero_flag = re.0;
+                sat.sign_flag = re.1;
 				println!("OPCODE_OR_RR");
 			},
 
 			constants::OPCODE_OR_RI => {
+                sat.registers[dreg] = sat.registers[dreg] | imm as u8;
+                let re = set_flags(sat.registers[dreg] as i8);
+                sat.zero_flag = re.0;
+                sat.sign_flag = re.1;
 				println!("OPCODE_OR_RI");
 			},
 
 			constants::OPCODE_XOR_RR => {
+                sat.registers[dreg] = sat.registers[dreg] ^ sat.registers[sreg];
+                let re = set_flags(sat.registers[dreg] as i8);
+                sat.zero_flag = re.0;
+                sat.sign_flag = re.1;
 				println!("OPCODE_XOR_RR");
 			},
 
 			constants::OPCODE_XOR_RI => {
+                sat.registers[dreg] = sat.registers[dreg] ^ imm as u8;
+                let re = set_flags(sat.registers[dreg] as i8);
+                sat.zero_flag = re.0;
+                sat.sign_flag = re.1;
 				println!("OPCODE_XOR_RI");
 			},
 
 			constants::OPCODE_LOAD_RM => {
+                if (mem as usize) < constants::SIZE_APP_RAM {
+                    sat.registers[dreg] = sat.ram[mem as usize];
+                } else if mem as i32 == constants::IO_TERMINAL {
+                    if !sat.linefeed_buffered {
+                        match scr.mainWin.getch() {
+                            Some(pancurses::Input::Unknown(key)) => {
+                                if 0 < key {
+                                    println!("ERROR : NCurses Key {}", key);
+                                    sat.registers[dreg] = 0;
+                                } else {
+                                    println!("ERROR : Unknown Key {}", key);
+                                    sat.registers[dreg] = key as u8;
+                                }
+                            },
+                            Some(pancurses::Input::KeyEnter) => {
+                                sat.registers[dreg] = 0xD;
+                                sat.linefeed_buffered = true;
+                            },
+                            /*constants::DEBUG_PAUSE_KEY => {
+                                sat.interrupt_flag = true;
+                            },*/
+                            _ => {},
+                        };
+                    } else {
+                        sat.registers[dreg] = 0xA;
+                        sat.linefeed_buffered = false;
+                    }
+                } else {
+                    println!("{}", constants::ERR_LOAD);
+                    return;
+                }
 				println!("OPCODE_LOAD_RM");
 			},
 
 			constants::OPCODE_LOADP_RR => {
-				println!("OPCODE_JEQ_M");
+                if (sat.registers[sreg] as usize) < constants::SIZE_APP_RAM {
+                    sat.registers[dreg] = sat.ram[sat.registers[sreg] as usize];
+                } else if sat.ram[sat.registers[sreg] as usize] as i32 == constants::IO_TERMINAL {
+                    if sat.linefeed_buffered {
+                        sat.registers[dreg] = 0xA;
+                        sat.linefeed_buffered = false;
+                    } else {
+                        match scr.mainWin.getch() {
+                            Some(pancurses::Input::Unknown(key)) => {
+                                if 0 < key {
+                                    println!("ERROR : NCurses Key {}", key);
+                                    sat.registers[dreg] = 0;
+                                } else {
+                                    println!("ERROR : Unknown Key {}", key);
+                                    sat.registers[dreg] = key as u8;
+                                }
+                            },
+                            Some(pancurses::Input::KeyEnter) => {
+                                sat.registers[dreg] = 0xD;
+                                sat.linefeed_buffered = true;
+                            },
+                            /*constants::DEBUG_PAUSE_KEY => {
+                                sat.interrupt_flag = true;
+                            },*/
+                            _ => {},
+                        };
+                    }
+                } else {
+                    println!("{}", constants::ERR_LOAD);
+                    return;
+                }
+				println!("OPCODE_LOADP_RR");
 			},
 
 			constants::OPCODE_STOR_MR => {
+
 				println!("OPCODE_STOR_MR");
 			},
 
@@ -366,4 +545,16 @@ fn get_mem(lowBits: u8) -> u8 {
 
 fn get_imm(lowBits: i8) -> i8 {
 	lowBits
+}
+
+fn set_flags(result: i8) -> (bool, bool){
+	if 0 == result {
+		(true, false)
+	} else if 0 < result {
+		(false, false)
+	} else {
+		(false, true)
+		//sat.zero_flag = false;
+		//sat.sign_flag = true;
+	}
 }

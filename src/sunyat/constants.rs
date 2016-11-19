@@ -3,7 +3,7 @@
  * On read:  0 if no key, key code otherwise
  * On write: character output w/ cursor adjust
  */
-const IO_TERMINAL: i32 = 0xFF;
+pub const IO_TERMINAL: i32 = 0xFF;
 
 pub const EXIT_SUCCESS: usize = 0;
 
@@ -55,7 +55,7 @@ pub const REG_WIN: usize = 3;
  *  Brief:
  *      FILL IN
  */
-const REG_SP: i32 = 4;
+pub const REG_SP: usize = 4;
 
 /**
  *  Brief:
@@ -536,6 +536,16 @@ const DEBUGGER_SWITCH: &'static str = "-d\0";
 pub const ERR_BYTE_SIZE: &'static str = "\tApplication is not the correct byte size.\n";
 
 pub const ERR_INVALID_PC: &'static str = "\tProgram counter is invalid\n";
+
+pub const ERR_DIV_ZERO: &'static str = "\tDivide by zero error\n";
+
+pub const ERR_JMP_RANGE: &'static str = "\tJMP instruction targets an out of range address\n";
+
+pub const ERR_CALL_OVERFLOW: &'static str = "\tCALL overflowed the stack\n";
+
+pub const ERR_CALL_RANGE: &'static str = "\tCALL instruction targets an out of range address\n";
+
+pub const ERR_LOAD: &'static str = "\tLOAD instruction uses an out of range address\n";
 
 pub const TERMINAL_WIDTH: i32 = 80;
 
