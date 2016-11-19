@@ -3,7 +3,7 @@
  * On read:  0 if no key, key code otherwise
  * On write: character output w/ cursor adjust
  */
-pub const IO_TERMINAL: i32 = 0xFF;
+pub const IO_TERMINAL: u8 = 0xFF;
 
 pub const EXIT_SUCCESS: usize = 0;
 
@@ -546,6 +546,12 @@ pub const ERR_CALL_OVERFLOW: &'static str = "\tCALL overflowed the stack\n";
 pub const ERR_CALL_RANGE: &'static str = "\tCALL instruction targets an out of range address\n";
 
 pub const ERR_LOAD: &'static str = "\tLOAD instruction uses an out of range address\n";
+
+pub const ERR_STOR: &'static str = "\tSTOR instruction uses an out of range address\n";
+
+pub const ERR_PUSH: &'static str = "\tPSH overflowed the stack\n";
+
+pub const ERR_POP: &'static str = "\tPOP underflowed the stack\n";
 
 pub const TERMINAL_WIDTH: i32 = 80;
 

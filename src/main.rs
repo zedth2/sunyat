@@ -1,5 +1,6 @@
 extern crate ncurses;
 extern crate pancurses;
+extern crate libc;
 
 use std::env;
 

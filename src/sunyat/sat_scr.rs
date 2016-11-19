@@ -20,10 +20,10 @@ const ERR_NCURSES_CURSOR: &'static str = "\tCould not modify cursor\n";
 
 
 pub struct SatWin {
-	terminal: [[char; constants::TERMINAL_HEIGHT as usize]; constants::TERMINAL_WIDTH as usize],
+	pub terminal: [[char; constants::TERMINAL_HEIGHT as usize]; constants::TERMINAL_WIDTH as usize],
     pub mainWin: pancurses::Window,
-    cur_X: i32,
-    cur_Y: i32,
+    pub cur_X: i32,
+    pub cur_Y: i32,
     max_X: i32,
     max_Y: i32,
 }

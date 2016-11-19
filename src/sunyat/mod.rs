@@ -1,14 +1,13 @@
-extern crate libc;
-
-
 use std::io::Read;
 use std::fs::File;
 use std::string::String;
 
 use ncurses;
 use pancurses;
+use libc::isprint;
 
 pub mod constants;
+use self::constants::*;
 
 mod sat_scr;
 
@@ -20,8 +19,8 @@ struct SunyAT {
     zero_flag: bool,
     sign_flag: bool,
     interrupt_flag: bool,
-    ram: [u8; constants::SIZE_APP_RAM],
-    registers: [u8; constants::SIZE_REG],
+    ram: [u8; SIZE_APP_RAM],
+    registers: [u8; SIZE_REG],
 }
 
 impl Default for SunyAT {
@@ -30,15 +29,15 @@ impl Default for SunyAT {
         newSat.registers[0] = 0;
         newSat.registers[1] = 0;
         newSat.registers[2] = 0;
-        newSat.registers[3] = constants::NUM_SYS_REG as u8;
-        newSat.registers[4] = constants::SIZE_APP_RAM as u8;
+        newSat.registers[3] = NUM_SYS_REG as u8;
+        newSat.registers[4] = SIZE_APP_RAM as u8;
         newSat
     }
 }
 
 pub fn start_sunyat(rom: &String, lState: bool, lDebug: bool) -> usize{
     //let clock_start = unsafe {libc::clock()}; //Use this to pause eventually
-    let mut reVal = constants::EXIT_SUCCESS;
+    let mut reVal = EXIT_SUCCESS;
     let mut curSunyAT = SunyAT { ..Default::default() };
 	let mut win: sat_scr::SatWin;
     if lState {
@@ -46,7 +45,7 @@ pub fn start_sunyat(rom: &String, lState: bool, lDebug: bool) -> usize{
     } else {
         reVal = load_rom(&mut curSunyAT, rom);
     }
-    if constants::EXIT_SUCCESS != reVal {
+    if EXIT_SUCCESS != reVal {
         return reVal;
     }
 
@@ -54,8 +53,8 @@ pub fn start_sunyat(rom: &String, lState: bool, lDebug: bool) -> usize{
 
 	//if !lDebug {
 		win = sat_scr::SatWin::new();
-		if constants::EXT_ERR_NCURSES == win.setup_ncurses_terminal(){
-			return constants::EXT_ERR_NCURSES;
+		if EXT_ERR_NCURSES == win.setup_ncurses_terminal(){
+			return EXT_ERR_NCURSES;
 		}
 	//} else {
 
@@ -70,46 +69,46 @@ pub fn start_sunyat(rom: &String, lState: bool, lDebug: bool) -> usize{
 }
 
 fn load_rom(sunyat: &mut SunyAT, rom: &String) -> usize {
-    let mut file_buffer: [u8; constants::SIZE_APP_RAM] = [0; constants::SIZE_APP_RAM];
-    let mut app_msg: [u8; constants::SIZE_APP_MSG] = ['a' as u8; constants::SIZE_APP_MSG]; //This should be char so we can read the app message thats stored in the first bytes of the rom
+    let mut file_buffer: [u8; SIZE_APP_RAM] = [0; SIZE_APP_RAM];
+    let mut app_msg: [u8; SIZE_APP_MSG] = ['a' as u8; SIZE_APP_MSG]; //This should be char so we can read the app message thats stored in the first bytes of the rom
     let mut inFile = match File::open(rom){
         Ok(file) => file,
         Err(err) => {
             println!("Error: {}", err);
-            return constants::EXT_ERR_FILE_NOT_OPEN;
+            return EXT_ERR_FILE_NOT_OPEN;
         },
     };
     let size = match inFile.read(&mut app_msg[..]){
 		Ok(size) => size,
 		Err(err) => {
 			println!("ERROR : {}", err);
-			return constants::EXT_ERR_FILE_READ;
+			return EXT_ERR_FILE_READ;
 		},
 	};
     let size = match inFile.read(&mut file_buffer[..]){
 		Ok(size) => size,
 		Err(err) => {
 			println!("ERROR : {}", err);
-			return constants::EXT_ERR_FILE_READ;
+			return EXT_ERR_FILE_READ;
 		},
 	};
     /*match inFile.read_to_end(&mut file_buffer){
         Ok(file) => file,
         Err(err) =>{
             println!("Error: {}", err);
-            return constants::EXT_ERR_FILE_READ;
+            return EXT_ERR_FILE_READ;
         },
     };*/
-    if constants::SIZE_APP_RAM != file_buffer.len(){ //Should this be > ?
-        println!("Error: {}", constants::ERR_BYTE_SIZE);
-        return constants::EXT_ERR_ROM_BIG;
+    if SIZE_APP_RAM != file_buffer.len(){ //Should this be > ?
+        println!("Error: {}", ERR_BYTE_SIZE);
+        return EXT_ERR_ROM_BIG;
     } //Deleted the else that was in original C code.
 
     sunyat.ram = file_buffer ;
 
 
 
-    return constants::EXIT_SUCCESS;
+    return EXIT_SUCCESS;
 }
 
 fn load_state(sunyat: &mut SunyAT, rom: &String) -> usize
@@ -129,10 +128,10 @@ fn sunyat_execute(sat: &mut SunyAT, scr: &mut sat_scr::SatWin, lDebug: bool){
 		let mut imm: i8;
 		let mut cmp_result: u8;
 
-		let mut curHeight: i32 = scr.mainWin.get_max_y();
-		let mut curWidth: i32 = scr.mainWin.get_max_x();
+		let curHeight: i32 = scr.mainWin.get_max_y();
+		let curWidth: i32 = scr.mainWin.get_max_x();
 
-		if curWidth < constants::TERMINAL_WIDTH || curHeight < constants::TERMINAL_HEIGHT {
+		if curWidth < TERMINAL_WIDTH || curHeight < TERMINAL_HEIGHT {
 			let mut x: i32;
 			let mut y: i32;
 
@@ -164,41 +163,41 @@ fn sunyat_execute(sat: &mut SunyAT, scr: &mut sat_scr::SatWin, lDebug: bool){
 
 		sat.clock_ticks += 1;
 
-		if sat.registers[constants::REG_PC] > ((constants::SIZE_APP_RAM - 2) as u8) {
-			println!("ERROR : {} {}", sat.registers[constants::REG_PC], sat.clock_ticks);
-			println!("ERROR : {}", constants::ERR_INVALID_PC);
+		if sat.registers[REG_PC] > ((SIZE_APP_RAM - 2) as u8) {
+			println!("ERROR : {} {}", sat.registers[REG_PC], sat.clock_ticks);
+			println!("ERROR : {}", ERR_INVALID_PC);
 			return;
 		}
 
-		sat.registers[constants::REG_PC] += 1;
-		sat.registers[constants::REG_IRH] = sat.ram[sat.registers[constants::REG_PC] as usize];
-		sat.registers[constants::REG_PC] += 1;
-		sat.registers[constants::REG_IRL] = sat.ram[sat.registers[constants::REG_PC] as usize];
+		sat.registers[REG_PC] += 1;
+		sat.registers[REG_IRH] = sat.ram[sat.registers[REG_PC] as usize];
+		sat.registers[REG_PC] += 1;
+		sat.registers[REG_IRL] = sat.ram[sat.registers[REG_PC] as usize];
 
-		opcode = get_opcode(sat.registers[constants::REG_IRH]);
+		opcode = get_opcode(sat.registers[REG_IRH]);
 
-		sreg = get_grwp(sat.registers[constants::REG_WIN], get_sreg(sat.registers[constants::REG_IRL])) as usize;
+		sreg = get_grwp(sat.registers[REG_WIN], get_sreg(sat.registers[REG_IRL])) as usize;
 
-		dreg = get_grwp(sat.registers[constants::REG_WIN], get_dreg(sat.registers[constants::REG_IRH])) as usize;
+		dreg = get_grwp(sat.registers[REG_WIN], get_dreg(sat.registers[REG_IRH])) as usize;
 
-		imm = get_imm(sat.registers[constants::REG_IRL] as i8);
-		mem = get_mem(sat.registers[constants::REG_IRL]);
+		imm = get_imm(sat.registers[REG_IRL] as i8);
+		mem = get_mem(sat.registers[REG_IRL]);
 
 		if lDebug {
 
 		}
 		println!("OPCODE : {}", opcode);
 		match opcode {
-			constants::OPCODE_MOV_RR => {
+			OPCODE_MOV_RR => {
 				sat.registers[dreg] = sat.registers[sreg];
 				println!("OPCODE_MOV_RR");
 			},
-			constants::OPCODE_MOV_RI => {
+			OPCODE_MOV_RI => {
 				sat.registers[dreg] = imm as u8;
 				println!("OPCODE_MOV_RI");
 			},
 
-			constants::OPCODE_ADD_RR => {
+			OPCODE_ADD_RR => {
 				sat.registers[dreg] = sat.registers[dreg] + sat.registers[sreg];
 				let re = set_flags(sat.registers[dreg] as i8);
 				sat.zero_flag = re.0;
@@ -206,7 +205,7 @@ fn sunyat_execute(sat: &mut SunyAT, scr: &mut sat_scr::SatWin, lDebug: bool){
 				println!("OPCODE_ADD_RR");
 			},
 
-			constants::OPCODE_ADD_RI => {
+			OPCODE_ADD_RI => {
 				sat.registers[dreg] = (sat.registers[dreg] as i8 + imm) as u8;
 				let re = set_flags(sat.registers[dreg] as i8);
 				sat.zero_flag = re.0;
@@ -214,7 +213,7 @@ fn sunyat_execute(sat: &mut SunyAT, scr: &mut sat_scr::SatWin, lDebug: bool){
 				println!("OPCODE_ADD_RI");
 			},
 
-			constants::OPCODE_SUB_RR => {
+			OPCODE_SUB_RR => {
                 sat.registers[dreg] = sat.registers[dreg] - sat.registers[sreg];
                 let re = set_flags(sat.registers[dreg] as i8);
                 sat.zero_flag = re.0;
@@ -222,7 +221,7 @@ fn sunyat_execute(sat: &mut SunyAT, scr: &mut sat_scr::SatWin, lDebug: bool){
 				println!("OPCODE_SUB_RR");
 			},
 
-			constants::OPCODE_MUL_RR => {
+			OPCODE_MUL_RR => {
                 sat.registers[dreg] = sat.registers[dreg] * sat.registers[sreg];
                 let re = set_flags(sat.registers[dreg] as i8);
                 sat.zero_flag = re.0;
@@ -230,7 +229,7 @@ fn sunyat_execute(sat: &mut SunyAT, scr: &mut sat_scr::SatWin, lDebug: bool){
 				println!("OPCODE_MUL_RR");
 			},
 
-			constants::OPCODE_MUL_RI => {
+			OPCODE_MUL_RI => {
                 sat.registers[dreg] = (sat.registers[dreg] as i8 * imm) as u8;
 				let re = set_flags(sat.registers[dreg] as i8);
 				sat.zero_flag = re.0;
@@ -238,9 +237,9 @@ fn sunyat_execute(sat: &mut SunyAT, scr: &mut sat_scr::SatWin, lDebug: bool){
 				println!("OPCODE_MUL_RI");
 			},
 
-			constants::OPCODE_DIV_RR => {
+			OPCODE_DIV_RR => {
                 if 0 == sat.registers[sreg] {
-                    println!("{}", constants::ERR_DIV_ZERO);
+                    println!("{}", ERR_DIV_ZERO);
                     return;
                 }
                 sat.registers[dreg] = (sat.registers[dreg] as i8 / imm) as u8;
@@ -250,9 +249,9 @@ fn sunyat_execute(sat: &mut SunyAT, scr: &mut sat_scr::SatWin, lDebug: bool){
 				println!("OPCODE_MUL_RI");
 			},
 
-			constants::OPCODE_DIV_RI => {
+			OPCODE_DIV_RI => {
                 if 0 == sat.registers[sreg] {
-                    println!("{}", constants::ERR_DIV_ZERO);
+                    println!("{}", ERR_DIV_ZERO);
                     return;
                 }
                 sat.registers[dreg] = (sat.registers[dreg] as i8 / imm) as u8;
@@ -262,94 +261,94 @@ fn sunyat_execute(sat: &mut SunyAT, scr: &mut sat_scr::SatWin, lDebug: bool){
 				println!("OPCODE_DIV_RI");
 			},
 
-			constants::OPCODE_CMP_RR => {
+			OPCODE_CMP_RR => {
                 let re = set_flags((sat.registers[dreg] - sat.registers[sreg]) as i8);
                 sat.zero_flag = re.0;
                 sat.sign_flag = re.1;
 				println!("OPCODE_CMP_RR");
 			},
 
-			constants::OPCODE_CMP_RI => {
+			OPCODE_CMP_RI => {
                 let re = set_flags(sat.registers[dreg] as i8 - imm);
                 sat.zero_flag = re.0;
                 sat.sign_flag = re.1;
 				println!("OPCODE_CMP_RI");
 			},
 
-			constants::OPCODE_JMP_M => {
-                if mem as usize >= constants::SIZE_APP_RAM {
-                    println!("{}", constants::ERR_JMP_RANGE);
+			OPCODE_JMP_M => {
+                if mem as usize >= SIZE_APP_RAM {
+                    println!("{}", ERR_JMP_RANGE);
                     return;
                 }
-                sat.registers[constants::REG_PC] = mem;
+                sat.registers[REG_PC] = mem;
 				println!("OPCODE_JMP_M");
 			},
 
-			constants::OPCODE_JEQ_M => {
+			OPCODE_JEQ_M => {
                 if sat.zero_flag {
-                    sat.registers[constants::REG_PC] = mem;
+                    sat.registers[REG_PC] = mem;
                 }
 				println!("OPCODE_JEQ_M");
 			},
 
-			constants::OPCODE_JNE_M => {
+			OPCODE_JNE_M => {
                 if !sat.zero_flag {
-                    sat.registers[constants::REG_PC] = mem;
+                    sat.registers[REG_PC] = mem;
                 }
 				println!("OPCODE_JNE_M");
 			},
 
-			constants::OPCODE_JGR_M => {
+			OPCODE_JGR_M => {
                 if !sat.sign_flag && !sat.zero_flag {
-                    sat.registers[constants::REG_PC] = mem;
+                    sat.registers[REG_PC] = mem;
                 }
 				println!("OPCODE_JGR_M");
 			},
 
-			constants::OPCODE_JLS_M => {
+			OPCODE_JLS_M => {
                 if !sat.sign_flag {
-                    sat.registers[constants::REG_PC] = mem;
+                    sat.registers[REG_PC] = mem;
                 } else {
-                    if 0 >= sat.registers[constants::REG_SP] {
-                        println!("{}", constants::ERR_CALL_OVERFLOW);
+                    if 0 >= sat.registers[REG_SP] {
+                        println!("{}", ERR_CALL_OVERFLOW);
                         return;
                     }
-                    if mem as usize >= constants::SIZE_APP_RAM {
-                        println!("{}", constants::ERR_CALL_RANGE);
+                    if mem as usize >= SIZE_APP_RAM {
+                        println!("{}", ERR_CALL_RANGE);
                         return;
                     }
-                    sat.registers[constants::REG_SP] -= 1;
-                    sat.ram[sat.registers[constants::REG_SP] as usize] = sat.registers[constants::REG_PC];
-                    sat.registers[constants::REG_PC] = mem;
+                    sat.registers[REG_SP] -= 1;
+                    sat.ram[sat.registers[REG_SP] as usize] = sat.registers[REG_PC];
+                    sat.registers[REG_PC] = mem;
                 }
 				println!("OPCODE_JLS_M");
 			},
 
-			constants::OPCODE_CALL_M => {
-                if 0 >= sat.registers[constants::REG_SP] {
-                    println!("{}", constants::ERR_CALL_OVERFLOW);
+			OPCODE_CALL_M => {
+                if 0 >= sat.registers[REG_SP] {
+                    println!("{}", ERR_CALL_OVERFLOW);
                     return;
                 }
-                if mem as usize >= constants::SIZE_APP_RAM {
-                    println!("{}", constants::ERR_CALL_RANGE);
+                if mem as usize >= SIZE_APP_RAM {
+                    println!("{}", ERR_CALL_RANGE);
                     return ;
                 }
-                sat.registers[constants::REG_SP] -= 1;
-                sat.ram[sat.registers[constants::REG_SP] as usize] = sat.registers[constants::REG_PC];
-                sat.registers[constants::REG_PC] = mem;
+                sat.registers[REG_SP] -= 1;
+                sat.ram[sat.registers[REG_SP] as usize] = sat.registers[REG_PC];
+                sat.registers[REG_PC] = mem;
 				println!("OPCODE_CALL_M");
 			},
 
-			constants::OPCODE_RET => {
-                if constants::SIZE_APP_RAM <= sat.registers[constants::REG_SP] as usize {
+			OPCODE_RET => {
+                if SIZE_APP_RAM <= sat.registers[REG_SP] as usize {
                     return ;
                 }
-                sat.registers[constants::REG_PC] = sat.ram[sat.registers[constants::REG_SP] as usize];
-                sat.registers[constants::REG_SP] += 1;
+                sat.registers[REG_PC] = sat.ram[sat.registers[REG_SP] as usize];
+                sat.registers[REG_SP] += 1;
 				println!("OPCODE_RET");
 			},
 
-			constants::OPCODE_AND_RR => {
+			OPCODE_AND_RR => {
                 sat.registers[dreg] = sat.registers[dreg] & sat.registers[sreg];
                 let re = set_flags(sat.registers[dreg] as i8);
                 sat.zero_flag = re.0;
@@ -357,7 +356,7 @@ fn sunyat_execute(sat: &mut SunyAT, scr: &mut sat_scr::SatWin, lDebug: bool){
 				println!("OPCODE_AND_RR");
 			},
 
-			constants::OPCODE_AND_RI => {
+			OPCODE_AND_RI => {
                 sat.registers[dreg] = sat.registers[dreg] & imm as u8;
                 let re = set_flags(sat.registers[dreg] as i8);
                 sat.zero_flag = re.0;
@@ -365,7 +364,7 @@ fn sunyat_execute(sat: &mut SunyAT, scr: &mut sat_scr::SatWin, lDebug: bool){
 				println!("OPCODE_AND_RI");
 			},
 
-			constants::OPCODE_OR_RR => {
+			OPCODE_OR_RR => {
                 sat.registers[dreg] = sat.registers[dreg] | sat.registers[sreg];
                 let re = set_flags(sat.registers[dreg] as i8);
                 sat.zero_flag = re.0;
@@ -373,7 +372,7 @@ fn sunyat_execute(sat: &mut SunyAT, scr: &mut sat_scr::SatWin, lDebug: bool){
 				println!("OPCODE_OR_RR");
 			},
 
-			constants::OPCODE_OR_RI => {
+			OPCODE_OR_RI => {
                 sat.registers[dreg] = sat.registers[dreg] | imm as u8;
                 let re = set_flags(sat.registers[dreg] as i8);
                 sat.zero_flag = re.0;
@@ -381,7 +380,7 @@ fn sunyat_execute(sat: &mut SunyAT, scr: &mut sat_scr::SatWin, lDebug: bool){
 				println!("OPCODE_OR_RI");
 			},
 
-			constants::OPCODE_XOR_RR => {
+			OPCODE_XOR_RR => {
                 sat.registers[dreg] = sat.registers[dreg] ^ sat.registers[sreg];
                 let re = set_flags(sat.registers[dreg] as i8);
                 sat.zero_flag = re.0;
@@ -389,7 +388,7 @@ fn sunyat_execute(sat: &mut SunyAT, scr: &mut sat_scr::SatWin, lDebug: bool){
 				println!("OPCODE_XOR_RR");
 			},
 
-			constants::OPCODE_XOR_RI => {
+			OPCODE_XOR_RI => {
                 sat.registers[dreg] = sat.registers[dreg] ^ imm as u8;
                 let re = set_flags(sat.registers[dreg] as i8);
                 sat.zero_flag = re.0;
@@ -397,10 +396,10 @@ fn sunyat_execute(sat: &mut SunyAT, scr: &mut sat_scr::SatWin, lDebug: bool){
 				println!("OPCODE_XOR_RI");
 			},
 
-			constants::OPCODE_LOAD_RM => {
-                if (mem as usize) < constants::SIZE_APP_RAM {
+			OPCODE_LOAD_RM => {
+                if (mem as usize) < SIZE_APP_RAM {
                     sat.registers[dreg] = sat.ram[mem as usize];
-                } else if mem as i32 == constants::IO_TERMINAL {
+                } else if mem == IO_TERMINAL {
                     if !sat.linefeed_buffered {
                         match scr.mainWin.getch() {
                             Some(pancurses::Input::Unknown(key)) => {
@@ -416,7 +415,7 @@ fn sunyat_execute(sat: &mut SunyAT, scr: &mut sat_scr::SatWin, lDebug: bool){
                                 sat.registers[dreg] = 0xD;
                                 sat.linefeed_buffered = true;
                             },
-                            /*constants::DEBUG_PAUSE_KEY => {
+                            /*DEBUG_PAUSE_KEY => {
                                 sat.interrupt_flag = true;
                             },*/
                             _ => {},
@@ -426,16 +425,16 @@ fn sunyat_execute(sat: &mut SunyAT, scr: &mut sat_scr::SatWin, lDebug: bool){
                         sat.linefeed_buffered = false;
                     }
                 } else {
-                    println!("{}", constants::ERR_LOAD);
+                    println!("{}", ERR_LOAD);
                     return;
                 }
 				println!("OPCODE_LOAD_RM");
 			},
 
-			constants::OPCODE_LOADP_RR => {
-                if (sat.registers[sreg] as usize) < constants::SIZE_APP_RAM {
+			OPCODE_LOADP_RR => {
+                if (sat.registers[sreg] as usize) < SIZE_APP_RAM {
                     sat.registers[dreg] = sat.ram[sat.registers[sreg] as usize];
-                } else if sat.ram[sat.registers[sreg] as usize] as i32 == constants::IO_TERMINAL {
+                } else if sat.ram[sat.registers[sreg] as usize] == IO_TERMINAL {
                     if sat.linefeed_buffered {
                         sat.registers[dreg] = 0xA;
                         sat.linefeed_buffered = false;
@@ -454,50 +453,150 @@ fn sunyat_execute(sat: &mut SunyAT, scr: &mut sat_scr::SatWin, lDebug: bool){
                                 sat.registers[dreg] = 0xD;
                                 sat.linefeed_buffered = true;
                             },
-                            /*constants::DEBUG_PAUSE_KEY => {
+                            /*DEBUG_PAUSE_KEY => {
                                 sat.interrupt_flag = true;
                             },*/
                             _ => {},
                         };
                     }
                 } else {
-                    println!("{}", constants::ERR_LOAD);
+                    println!("{}", ERR_LOAD);
                     return;
                 }
 				println!("OPCODE_LOADP_RR");
 			},
 
-			constants::OPCODE_STOR_MR => {
-
+			OPCODE_STOR_MR => {
+                if (mem as usize) < SIZE_APP_RAM {
+                    sat.ram[mem as usize] = sat.registers[dreg as usize];
+                } else if mem == IO_TERMINAL {
+                    //let c: char = sat.registers[dreg as usize] as char;
+                    match sat.registers[dreg as usize] {
+                        0x9 => {
+                            scr.cur_X += TAB_SIZE as i32 - (scr.cur_X % TAB_SIZE as i32);
+                            if scr.cur_X >= TERMINAL_WIDTH {
+                                scr.cur_X = 0;
+                                scr.cur_Y = (scr.cur_Y + 1) % TERMINAL_HEIGHT;
+                            }
+                        },
+                        0xD => {
+                            scr.cur_X = 0;
+                        },
+                        0xA => {
+                            scr.cur_Y = (scr.cur_Y + 1) % TERMINAL_HEIGHT;
+                        },
+                        _ => {
+                            let re = unsafe { isprint(sat.registers[dreg as usize] as i32)} ;
+                            if 0 != re {
+                                scr.mainWin.printw(format!("{}", sat.registers[dreg as usize]).as_str());
+                                scr.terminal[scr.cur_X as usize][scr.cur_Y as usize] = sat.registers[dreg as usize] as char ;
+                                scr.cur_X += 1;
+                                if scr.cur_X >= TERMINAL_WIDTH {
+                                    scr.cur_X = 0;
+                                    scr.cur_Y = (scr.cur_Y + 1) % TERMINAL_HEIGHT;
+                                }
+                            } else {
+                                scr.mainWin.printw(format!("<0x{:01$X}>", sat.registers[dreg as usize], 2).as_str());
+                                scr.terminal[scr.cur_X as usize][scr.cur_Y as usize] = ' ';
+                            }
+                        },
+                    };
+                    scr.mainWin.mvprintw(scr.cur_Y, scr.cur_X, "");
+                    scr.mainWin.refresh();
+                } else {
+                    println!("{}", ERR_STOR);
+                    return;
+                }
 				println!("OPCODE_STOR_MR");
 			},
 
-			constants::OPCODE_STORP_RR => {
+			OPCODE_STORP_RR => {
+                if (sat.registers[dreg as usize] as usize) < SIZE_APP_RAM {
+                    sat.ram[sat.registers[dreg as usize] as usize] = sat.registers[sreg as usize];
+                } else if sat.registers[dreg as usize] == IO_TERMINAL {
+                    //let c: char = sat.registers[dreg] as char;
+                    match sat.registers[dreg as usize] {
+                        0x9 => {
+                            scr.cur_X += TAB_SIZE as i32 - (scr.cur_X % TAB_SIZE as i32);
+                            if scr.cur_X >= TERMINAL_WIDTH {
+                                scr.cur_X = 0;
+                                scr.cur_Y = (scr.cur_Y + 1) % TERMINAL_HEIGHT;
+                            }
+                        },
+                        0xD => {
+                            scr.cur_X = 0;
+                        },
+                        0xA => {
+                            scr.cur_Y = (scr.cur_Y + 1) % TERMINAL_HEIGHT;
+                        },
+                        _ => {
+                            let re = unsafe { isprint(sat.registers[dreg as usize] as i32)} ;
+                            if 0 != re {
+                                scr.mainWin.printw(format!("{}", sat.registers[dreg as usize]).as_str());
+                                scr.terminal[scr.cur_X as usize][scr.cur_Y as usize] = sat.registers[dreg as usize] as char ;
+                                scr.cur_X += 1;
+                                if scr.cur_X >= TERMINAL_WIDTH {
+                                    scr.cur_X = 0;
+                                    scr.cur_Y = (scr.cur_Y + 1) % TERMINAL_HEIGHT;
+                                }
+                            } else {
+                                scr.mainWin.printw(format!("<0x{0:01$X}>", sat.registers[dreg as usize], 2).as_str());
+                                scr.terminal[scr.cur_X as usize][scr.cur_Y as usize] = ' ';
+                            }
+                        },
+                    };
+                    scr.mainWin.mvprintw(scr.cur_Y, scr.cur_X, "");
+                    scr.mainWin.refresh();
+                } else {
+                    println!("{}", ERR_STOR);
+                    return;
+                }
 				println!("OPCODE_STORP_RR");
 			},
 			/*
-			constants::OPCODE_PUSH_R => {
+			OPCODE_PUSH_R => {
 
 			},
 
-			constants::OPCODE_POP_R => {
+			OPCODE_POP_R => {
 
 			},
 			*/
 
-			constants::OPCODE_STACKER_R => {
+			OPCODE_STACKER_R => {
+                if 0 == imm {
+                    if 0 >= sat.registers[REG_SP]{
+                        println!("{}", ERR_PUSH);
+                        return;
+                    }
+                    sat.registers[REG_SP] -= 1;
+                    sat.ram[sat.registers[REG_SP] as usize] = sat.registers[dreg as usize];
+                } else {
+                    if (sat.registers[REG_SP] as usize) >= SIZE_APP_RAM {
+                        println!("{}", ERR_POP);
+                        return;
+                    }
+                    sat.registers[dreg as usize] = sat.ram[sat.registers[REG_SP] as usize];
+                    sat.registers[REG_SP] += 1;
+                }
 				println!("OPCODE_STACKER_R");
 			},
 
-			constants::OPCODE_SWR_I => {
+			OPCODE_SWR_I => {
+                sat.registers[REG_WIN] = imm;
 				println!("OPCODE_SWR_I");
 			},
 
-			constants::OPCODE_AWR_I => {
+			OPCODE_AWR_I => {
+                sat.registers[REG_WIN] = get_grimm(sat.registers[REG_WIN], imm);
+                let re = set_flags(sat.registers[REG_WIN] as i8);
+                sat.zero_flag = re.0;
+                sat.sign_flag = re.1;
 				println!("OPCODE_AWR_I");
 			},
 
-			constants::OPCODE_AUX_I => {
+			OPCODE_AUX_I => {
+
 				println!("OPCODE_AUX_I");
 			},
 
@@ -508,43 +607,43 @@ fn sunyat_execute(sat: &mut SunyAT, scr: &mut sat_scr::SatWin, lDebug: bool){
 	}
 }
 
-fn get_grwp(regWin: u8, reg: u8) -> u8{
-	((((regWin - constants::NUM_SYS_REG as u8) +
-		(constants::NUM_GEN_REG as u8 +
-		((constants::NUM_GEN_REG as u8 * (reg / constants::NUM_GEN_REG as u8) + reg) % constants::NUM_GEN_REG as u8))) %
-		constants::NUM_GEN_REG as u8) + constants::NUM_SYS_REG as u8)
+fn get_grwp(reg_win: u8, reg: u8) -> u8{
+	((((reg_win - NUM_SYS_REG as u8) +
+		(NUM_GEN_REG as u8 +
+		((NUM_GEN_REG as u8 * (reg / NUM_GEN_REG as u8) + reg) % NUM_GEN_REG as u8))) %
+		NUM_GEN_REG as u8) + NUM_SYS_REG as u8)
 }
 
-fn get_grimm(regWin: u8, imm: i8) -> i8{
+fn get_grimm(reg_win: u8, imm: i8) -> i8{
 	let mut highLow: i8 = 0;
 	if 0 > imm {
-		highLow = (imm - (constants::NUM_GEN_REG as i8 * (imm / constants::NUM_GEN_REG as i8)));
+		highLow = (imm - (NUM_GEN_REG as i8 * (imm / NUM_GEN_REG as i8)));
 	}
 	else if 0 < imm {
-		highLow = (constants::NUM_GEN_REG as i8 * (imm / constants::NUM_GEN_REG as i8) + imm) % constants::NUM_GEN_REG as i8;
+		highLow = (NUM_GEN_REG as i8 * (imm / NUM_GEN_REG as i8) + imm) % NUM_GEN_REG as i8;
 	}
-	((((regWin as i8 - constants::NUM_SYS_REG as i8) + (constants::NUM_GEN_REG as i8 + highLow)) % constants::NUM_GEN_REG as i8) + constants::NUM_SYS_REG as i8)
+	((((reg_win as i8 - NUM_SYS_REG as i8) + (NUM_GEN_REG as i8 + highLow)) % NUM_GEN_REG as i8) + NUM_SYS_REG as i8)
 }
 
 
-fn get_opcode(highBits: u8) -> u8 {
-	highBits >> 3
+fn get_opcode(high_bits: u8) -> u8 {
+	high_bits >> 3
 }
 
-fn get_dreg(highBits: u8) -> u8 {
-	highBits & 0x07
+fn get_dreg(high_bits: u8) -> u8 {
+	high_bits & 0x07
 }
 
-fn get_sreg(lowBits: u8) -> u8 {
-	lowBits & 0x07
+fn get_sreg(low_bits: u8) -> u8 {
+	low_bits & 0x07
 }
 
-fn get_mem(lowBits: u8) -> u8 {
-	lowBits
+fn get_mem(low_bits: u8) -> u8 {
+	low_bits
 }
 
-fn get_imm(lowBits: i8) -> i8 {
-	lowBits
+fn get_imm(low_bits: i8) -> i8 {
+	low_bits
 }
 
 fn set_flags(result: i8) -> (bool, bool){
