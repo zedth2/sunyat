@@ -8,5 +8,5 @@ mod sunyat;
 fn main() {
     println!("Hello, world!");
     let args: Vec<_> = env::args().collect();
-    sunyat::start_sunyat(&args[0], false, false);
+    sunyat::start_sunyat(&args[1], false, false);
 }

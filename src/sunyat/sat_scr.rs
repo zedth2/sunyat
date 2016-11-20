@@ -1,5 +1,4 @@
 
-use ncurses;
 use pancurses;
 
 use std::str;
@@ -21,11 +20,11 @@ const ERR_NCURSES_CURSOR: &'static str = "\tCould not modify cursor\n";
 
 pub struct SatWin {
 	pub terminal: [[char; constants::TERMINAL_HEIGHT as usize]; constants::TERMINAL_WIDTH as usize],
-    pub mainWin: pancurses::Window,
-    pub cur_X: i32,
-    pub cur_Y: i32,
-    max_X: i32,
-    max_Y: i32,
+	pub mainWin: pancurses::Window,
+	pub cur_X: i32,
+	pub cur_Y: i32,
+	max_X: i32,
+	max_Y: i32,
 }
 
 impl SatWin {
@@ -38,8 +37,8 @@ impl SatWin {
 			max_X: 0,
 			max_Y: 0,
 		};
-		w.cur_X = w.mainWin.get_max_x();
-		w.cur_Y = w.mainWin.get_max_y();
+		w.max_X = w.mainWin.get_max_x();
+		w.max_Y = w.mainWin.get_max_y();
 		//pancurses::getmaxyx(w.win, &mut w.max_X, &mut w.max_Y);
 		w
 	}
@@ -60,7 +59,7 @@ impl SatWin {
 			return constants::EXT_ERR_NCURSES;
 		}
 
-		if pancurses::ERR == self.mainWin.nodelay(true){
+		if pancurses::ERR == self.mainWin.nodelay(false){
 			println!("ERROR : {}", ERR_NCURSES_NODELAY);
 		}
 
@@ -69,7 +68,7 @@ impl SatWin {
 			return constants::EXT_ERR_NCURSES;
 		}
 
-		if pancurses::ERR == pancurses::curs_set(1){
+		if pancurses::ERR == pancurses::curs_set(1) {
 			println!("ERROR : {}", ERR_NCURSES_CURSOR);
 			return constants::EXT_ERR_NCURSES;
 		}
