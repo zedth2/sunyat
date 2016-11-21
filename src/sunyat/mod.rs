@@ -6,6 +6,8 @@ use std::string::String;
 use ncurses;
 use pancurses;
 use libc::isprint;
+use std::thread::sleep;
+use std::time::Duration;
 
 pub mod constants;
 use self::constants::*;
@@ -65,6 +67,7 @@ pub fn start_sunyat(rom: &String, lState: bool, lDebug: bool) -> usize{
 
 	sunyat_execute(&mut curSunyAT, &mut win, lDebug);
 
+    sleep(Duration::new(3,0));
 
 	return reVal;
 }
