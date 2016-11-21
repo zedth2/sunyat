@@ -135,20 +135,20 @@ fn load_state(sunyat: &mut SunyAT, rom: &String) -> usize
         },
         Err(errs) => {
             println!("ERROR : Can not read ROM");
-            return ERR_EXT_FILE_READ;
+            return EXT_ERR_FILE_READ;
         },
     };
-    match inFile.read(&mut saveROM[..]) {
+    match inFile.read(&mut saveREG[..]) {
         Ok(amt) => {
             if SIZE_REG != amt {
                 println!("ERROR : Save state registers size wrong.");
                 return EXT_ERR_ROM_BIG;
             }
-            sunyat.registers = saveROM ;
+            sunyat.registers = saveREG ;
         },
         Err(errs) => {
             println!("ERROR : Can not read ROM");
-            return ERR_EXT_FILE_READ;
+            return EXT_ERR_FILE_READ;
         },
     };
     return EXIT_SUCCESS;
