@@ -516,7 +516,7 @@ pub const EXT_ERR_NCURSES: usize = 6; //This should be expand to cover all ncurs
  *		Defines size of a savestate file.
  *
  */
-const SIZE_APP_SAVESTATE: usize = (SIZE_APP_RAM + SIZE_REG);
+pub const SIZE_APP_SAVESTATE: usize = (SIZE_APP_RAM + SIZE_REG);
 
 
 

@@ -1,4 +1,5 @@
-use std::io::Read;
+
+use std::io::prelude::*;
 use std::fs::File;
 use std::string::String;
 
@@ -113,7 +114,44 @@ fn load_rom(sunyat: &mut SunyAT, rom: &String) -> usize {
 
 fn load_state(sunyat: &mut SunyAT, rom: &String) -> usize
 {
-return 255;
+    let mut saveRAM: [u8; SIZE_APP_RAM] = [0; SIZE_APP_RAM];
+    let mut saveREG: [u8; SIZE_REG] = [0; SIZE_REG];
+    let mut inFile = match File::open(rom) {
+        Ok(f) => {
+            f
+        },
+        Err(errs) => {
+            println!("ERROR : {}", errs);
+            return EXT_ERR_FILE_NOT_OPEN;
+        },
+    };
+    match inFile.read(&mut saveRAM[..]){
+        Ok(amt) => {
+            if SIZE_APP_RAM != amt {
+                println!("ERROR : Save state RAM size wrong");
+                return EXT_ERR_ROM_BIG;
+            }
+            sunyat.ram = saveRAM ;
+        },
+        Err(errs) => {
+            println!("ERROR : Can not read ROM");
+            return ERR_EXT_FILE_READ;
+        },
+    };
+    match inFile.read(&mut saveROM[..]) {
+        Ok(amt) => {
+            if SIZE_REG != amt {
+                println!("ERROR : Save state registers size wrong.");
+                return EXT_ERR_ROM_BIG;
+            }
+            sunyat.registers = saveROM ;
+        },
+        Err(errs) => {
+            println!("ERROR : Can not read ROM");
+            return ERR_EXT_FILE_READ;
+        },
+    };
+    return EXIT_SUCCESS;
 }
 
 fn sunyat_execute(sat: &mut SunyAT, scr: &mut sat_scr::SatWin, lDebug: bool){
@@ -598,7 +636,32 @@ fn sunyat_execute(sat: &mut SunyAT, scr: &mut sat_scr::SatWin, lDebug: bool){
 			},
 
 			OPCODE_AUX_I => {
-
+				if 0 == imm {
+					let mut state = match File::create("savestate.rom") {
+						Err(errs) => {
+							panic!("ERROR : Could not create save state : {}", errs)
+						},
+						Ok(f) => {
+							f
+						},
+					};
+					match state.write_all(&sat.ram) {
+						Err(errs) => {
+							panic!("ERROR : Could not write ram save state : {}", errs)
+						},
+						Ok(_) => {},
+					};
+					match state.write_all(&sat.registers) {
+						Err(errs) => {
+							panic!("ERROR : Could not create save state : {}", errs)
+						},
+						Ok(_) => {},
+					};
+				} else if 1 == imm {
+					sat.interrupt_flag = true;
+				} else {
+					println!("AUX: 0 - 1 only!");
+				}
 				//println!("OPCODE_AUX_I");
 			},
 
